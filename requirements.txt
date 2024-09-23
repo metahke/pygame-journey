@@ -28,9 +28,11 @@ lxml==5.1.0
 mat==0.13.4
 mutagen==1.47.0
 nftables==0.1
+numpy==2.1.1
 olefile==0.47
 packaging==23.2
 pexpect==4.9.0
+pgzero==1.2.1
 pid==2.2.3
 pillow==10.3.0
 ply==3.11
