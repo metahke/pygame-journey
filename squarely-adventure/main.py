@@ -15,8 +15,8 @@ def main():
 
 
     # MAIN WINDOW
-    WIDTH = 800 #pygame.display.Info().current_w
-    HEIGHT = 600 #pygame.display.Info().current_h
+    WIDTH = 800
+    HEIGHT = 600
 
     HORIZONTAL_CENTER = WIDTH  // 2
     VERTICAL_CENTER = HEIGHT // 2
@@ -28,9 +28,14 @@ def main():
     clock = pygame.time.Clock()
 
 
+    # SCORE
+    score = 0
+
+
     # PLAYER
     PLAYER_WIDTH, PLAYER_HEIGHT = 150, 150
     PLAYER_X, PLAYER_Y = 0, 0
+    PLAYER_SPEED = 7
 
     # player_state = {
     #     "is_walking": False,
@@ -56,9 +61,6 @@ def main():
         }
     }
 
-
-    PLAYER_SPEED = 7
-
     player = Player(
         window,
         PLAYER_X, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SPEED,
@@ -69,9 +71,6 @@ def main():
 
     last_player_walk_switch_time = pygame.time.get_ticks()
     player_walk_switch_interval = 250
-
-
-    score = 0
 
 
     # ENEMY
@@ -124,6 +123,7 @@ def main():
         # - można też rozwinąć o kierunki, np. left-up, right-down
         # - może warto definiować player.is_walking w głównej pętli, poniżej
         # - nie zmiana z walk/idle/walk/idle, tylko raczej walk/1 walk/2 walk/1
+        # - zamiast player.is_walking, tp player.position "idle" lub "walk" ?
         if keys[pygame.K_LEFT]:
             player.move("left")
         if keys[pygame.K_RIGHT]:
@@ -134,6 +134,7 @@ def main():
             player.move("down")
 
 
+        # COLLISION DETECTION
         collide = pygame.Rect.colliderect(player.rect, enemy)
         if collide:
             score += 1
@@ -143,7 +144,6 @@ def main():
 
 
         # PLAYER LOGIC
-
         if player.position == "walk":
             if player.direction == "up" or player.direction == "down":
                 if player.vertical_leg_position == "left":
@@ -171,6 +171,7 @@ def main():
 
                     last_player_walk_switch_time = current_player_switch_time
 
+
         # ENEMY LOGIC
         current_time = pygame.time.get_ticks()
 
@@ -190,6 +191,7 @@ def main():
             window.blit(goth_image_right, enemy)
         else:  # if None
             window.blit(goth_image_left, enemy)
+
 
         pygame.display.update()
 
