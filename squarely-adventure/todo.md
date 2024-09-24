@@ -9,3 +9,4 @@
 - dodanie animacji chodzenia po skosie?
 - dodanie tekstury tła
 - zamienić postać na klasę ?
+- jak się powol idzie w dół i zatrzymuje, to po pewnym czasie wyskakuje błąd

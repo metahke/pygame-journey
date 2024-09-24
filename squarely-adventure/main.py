@@ -33,9 +33,9 @@ def main():
     PLAYER_X, PLAYER_Y = 0, 0
 
     # player_state = {
-    #     "is_player_walking": False,
-    #     "position": "DOWN",
-    #     "direction": "still", # ["still", "moving"]
+    #     "is_walking": False,
+    #     "position": "idle", # ["idle", "walk"],
+    #     "direction":  "down",
     #     "vertical_leg_position": "left" # [None, "left", "right"]
     # }
 
@@ -75,7 +75,7 @@ def main():
 
 
     # ENEMY
-    enemy_positions = ["LEFT", "RIGHT"]
+    enemy_positions = ["left", "right"]
     current_enemy_position = None
 
     ENEMY_WIDTH, ENEMY_HEIGHT = 75, 75
@@ -120,15 +120,18 @@ def main():
 
         player.is_walking = False
 
-        # a może np. if keys..., then player.direction = "LEFT" (?)
+        # - a może np. if keys..., then player.direction = "left" (?)
+        # - można też rozwinąć o kierunki, np. left-up, right-down
+        # - może warto definiować player.is_walking w głównej pętli, poniżej
+        # - nie zmiana z walk/idle/walk/idle, tylko raczej walk/1 walk/2 walk/1
         if keys[pygame.K_LEFT]:
-            player.move("LEFT")
+            player.move("left")
         if keys[pygame.K_RIGHT]:
-           player.move("RIGHT")
+           player.move("right")
         if keys[pygame.K_UP]:
-            player.move("UP")
+            player.move("up")
         if keys[pygame.K_DOWN]:
-            player.move("DOWN")
+            player.move("down")
 
 
         collide = pygame.Rect.colliderect(player.rect, enemy)
@@ -139,85 +142,51 @@ def main():
             enemy.center = (RANDOM_X, RANDOM_Y)
 
 
-        # image_path = ...
+        # PLAYER LOGIC
+
+        if player.position == "walk":
+            if player.direction == "up" or player.direction == "down":
+                if player.vertical_leg_position == "left":
+                    player.direction = f"{player.direction}_left"
+                    player.vertical_leg_position = "right"
+                elif player.vertical_leg_position == "right":
+                    player.direction = f"{player.direction}_right"
+                    player.vertical_leg_position = "left"
+
+        # here error, np. 'idle down_left'
+        try:
+            player.render(player.sprites[player.position][player.direction])
+        except:
+            print(player.position, player.direction)
 
         current_player_switch_time = pygame.time.get_ticks()
 
         if player.is_walking:
             if current_player_switch_time >= \
-            last_player_walk_switch_time + player_walk_switch_interval:
-                if player.position == "LEFT":
-                    if player.direction == "still":
-                        image_path = player.sprites["idle"]["left"]
-                        player.direction = "moving"
-                    elif player.direction == "moving":
-                        image_path = player.sprites["walk"]["left"]
-                        player.direction = "still"
-                elif player.position == "RIGHT":
-                    if player.direction == "still":
-                        image_path = player.sprites["idle"]["right"]
-                        player.direction = "moving"
-                    elif player.direction == "moving":
-                        image_path = player.sprites["walk"]["right"]
-                        player.direction = "still"
-                elif player.position == "UP":
-                    if player.direction == "still":
-                        image_path = player.sprites["idle"]["up"]
-                        player.direction = "moving"
-                    elif player.direction == "moving":
-                       if player.vertical_leg_position == "left":
-                           image_path = player.sprites["walk"]["up_left"]
-                           player.direction = "still"
-                           player.vertical_leg_position = "right"
-                       elif player.vertical_leg_position == "right":
-                           image_path = player.sprites["walk"]["up_right"]
-                           player.direction = "still"
-                           player.vertical_leg_position = "left"
-                elif player.position == "DOWN":
-                    if player.direction == "still":
-                        image_path = player.sprites["idle"]["down"]
-                        player.direction = "moving"
-                    elif player.direction == "moving":
-                       if player.vertical_leg_position == "left":
-                           image_path = player.sprites["walk"]["down_left"]
-                           player.direction = "still"
-                           player.vertical_leg_position = "right"
-                       elif player.vertical_leg_position == "right":
-                           image_path = player.sprites["walk"]["down_right"]
-                           player.direction = "still"
-                           player.vertical_leg_position = "left"
+                last_player_walk_switch_time + player_walk_switch_interval:
+                    if player.position == "idle":
+                        player.position = "walk"
+                    elif player.position == "walk":
+                        player.position = "idle"
 
-                last_player_walk_switch_time = current_player_switch_time
-        else:
-            if player.position == "LEFT":
-                image_path = player.sprites["idle"]["left"]
-            elif player.position == "UP":
-                image_path = player.sprites["idle"]["up"]
-            elif player.position == "RIGHT":
-                image_path = player.sprites["idle"]["right"]
-            elif player.position == "DOWN":
-                image_path = player.sprites["idle"]["down"]
+                    last_player_walk_switch_time = current_player_switch_time
 
-
-        player.render(image_path)
-
-
-
+        # ENEMY LOGIC
         current_time = pygame.time.get_ticks()
 
         if current_time >= last_switch_time + switch_interval:
-            if current_enemy_position == "LEFT":
-                current_enemy_position = "RIGHT"
-            elif current_enemy_position == "RIGHT":
-                current_enemy_position = "LEFT"
+            if current_enemy_position == "left":
+                current_enemy_position = "right"
+            elif current_enemy_position == "right":
+                current_enemy_position = "left"
             else:
-                current_enemy_position = "LEFT"
+                current_enemy_position = "left"
 
             last_switch_time = current_time
 
-        if current_enemy_position == "LEFT":
+        if current_enemy_position == "left":
             window.blit(goth_image_left, enemy)
-        elif current_enemy_position == "RIGHT":
+        elif current_enemy_position == "right":
             window.blit(goth_image_right, enemy)
         else:  # if None
             window.blit(goth_image_left, enemy)
