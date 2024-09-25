@@ -1,4 +1,4 @@
-import pygame, random, os
+import pygame, random, os, json
 from pygame.constants import QUIT
 from pygame.locals import Rect
 from pygame.surface import Surface
@@ -37,34 +37,18 @@ def main():
     PLAYER_X, PLAYER_Y = 0, 0
     PLAYER_SPEED = 7
 
-    # player_state = {
-    #     "is_walking": False,
-    #     "position": "idle", # ["idle", "walk"],
-    #     "direction":  "down",
-    #     "vertical_leg_position": "left" # [None, "left", "right"]
-    # }
+    with open("data/player.json", "r", encoding="utf-8") as file:
+        player_data = json.load(file)
 
-    player_sprites = {
-        "idle": {
-            "left": "images/blu-guy/left.png",
-            "up": "images/blu-guy/up.png",
-            "right": "images/blu-guy/right.png",
-            "down": "images/blu-guy/down.png"
-        },
-        "walk": {
-            "left": "images/blu-guy/left-walk.png",
-            "up_left": "images/blu-guy/up-walk-left.png",
-            "up_right": "images/blu-guy/up-walk-right.png",
-            "right": "images/blu-guy/right-walk.png",
-            "down_left": "images/blu-guy/down-walk-left.png",
-            "down_right": "images/blu-guy/down-walk-right.png",
-        }
-    }
+        player_state = player_data["state"]
+        player_sprites = player_data["sprites"]
+
 
     player = Player(
-        window,
-        PLAYER_X, PLAYER_Y, PLAYER_WIDTH, PLAYER_HEIGHT, PLAYER_SPEED,
-        player_sprites
+        window=window,
+        x=PLAYER_X, y=PLAYER_Y,
+        width=PLAYER_WIDTH, height=PLAYER_HEIGHT, speed = PLAYER_SPEED,
+        state=player_state, sprites=player_sprites
     )
 
     player.center(HORIZONTAL_CENTER, VERTICAL_CENTER)
@@ -117,7 +101,7 @@ def main():
             exit()
 
 
-        player.is_walking = False
+        player.state["is_walking"] = 0
 
         # - a może np. if keys..., then player.direction = "left" (?)
         # - można też rozwinąć o kierunki, np. left-up, right-down
@@ -144,30 +128,30 @@ def main():
 
 
         # PLAYER LOGIC
-        if player.position == "walk":
-            if player.direction == "up" or player.direction == "down":
-                if player.vertical_leg_position == "left":
-                    player.direction = f"{player.direction}_left"
-                    player.vertical_leg_position = "right"
-                elif player.vertical_leg_position == "right":
-                    player.direction = f"{player.direction}_right"
-                    player.vertical_leg_position = "left"
+        if player.state["position"] == "walk":
+            if player.state["direction"] == "up" or player.state["direction"] == "down":
+                if player.state["vertical_leg_position"] == "left":
+                    player.state["direction"] = f"{player.state["direction"]}_left"
+                    player.state["vertical_leg_position"] = "right"
+                elif player.state["vertical_leg_position"] == "right":
+                    player.state["direction"] = f"{player.state["direction"]}_right"
+                    player.state["vertical_leg_position"] = "left"
 
         # here error, np. 'idle down_left'
         try:
-            player.render(player.sprites[player.position][player.direction])
+            player.render(player.sprites[player.state["position"]][player.state["direction"]])
         except:
-            print(player.position, player.direction)
+            print(player.state["position"], player.state["direction"])
 
         current_player_switch_time = pygame.time.get_ticks()
 
-        if player.is_walking:
+        if player.state["is_walking"]:
             if current_player_switch_time >= \
                 last_player_walk_switch_time + player_walk_switch_interval:
-                    if player.position == "idle":
-                        player.position = "walk"
-                    elif player.position == "walk":
-                        player.position = "idle"
+                    if player.state["position"] == "idle":
+                        player.state["position"] = "walk"
+                    elif player.state["position"] == "walk":
+                        player.state["position"] = "idle"
 
                     last_player_walk_switch_time = current_player_switch_time
 

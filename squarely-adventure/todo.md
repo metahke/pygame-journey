@@ -1,6 +1,6 @@
 ## NEXT
 - przerzucić enemy na klasę
-- oddzielić player_data (state i sprites) od kodu głównego
+
 
 ## POPRAWKI
 - przy zmienianiu kierunku ruchu postać powinna od zmieniać animację, a nie czekać na zmianę okresu czasu is_walking
@@ -14,9 +14,17 @@
 - celem jest zdobycie jak najlepszej liczby punktów
 - gra pamięta poprzednią najlepszą punktację
 
+
 ## player.py
 - dodać metodę typu "switch" pozwalającą na zmianę stanu ruchu, np. player.switch_movement() (?)
 - self.is_walking i self.position w zamyśle spełnia tę samą funkcję: idle/False oraz walk/True
+- może jak się idzie do góry i w dół to animacji nie widać
+
 
 ## DONE
-- do 24/09/2024: refaktoryzacja kodu i ogólne poprawienie elementów
+
+### 25/09/2024
+- oddzielić player_data (state i sprites) od kodu głównego
+
+### do 24/09/2024
+- refaktoryzacja kodu i ogólne poprawienie elementów, zbudowanie gry

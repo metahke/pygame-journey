@@ -3,17 +3,13 @@ from pygame.locals import Rect
 
 
 class Player:
-    def __init__(self, window, x, y, width, height, speed, sprites):
+    def __init__(self, window, x, y, width, height, speed, state, sprites):
         self.window = window
         self.rect = Rect(x, y , width, height)
         self.speed = speed
 
+        self.state = state
         self.sprites = sprites
-
-        self.is_walking = False
-        self.position = "idle"  # ["idle", "walk"]
-        self.direction = "down"  # ["left", "up", "right", "down"]
-        self.vertical_leg_position = "left"  # [None, "left", "right"]
 
     def center(self, x, y):
         self.rect.center = (x, y)
@@ -42,8 +38,8 @@ class Player:
                 if self.rect.y > self.window.get_height():
                     self.rect.y = 0 - self.rect.width
 
-        self.is_walking = True
-        self.direction = direction
+        self.state["is_walking"] = 1
+        self.state["direction"] = direction
 
     def render(self, image_path):
         image = pygame.transform.scale(
