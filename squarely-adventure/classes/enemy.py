@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import Rect
 
 
-class Player:
+class Enemy:
     def __init__(self, window, x, y, width, height, speed, state, sprites):
         self.window = window
         self.rect = Rect(x, y , width, height)

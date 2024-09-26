@@ -1,0 +1,24 @@
+{
+  "state": {
+    "is_walking": 0,
+    "position": "idle",
+    "direction": "down",
+    "vertical_leg_position": "left"
+  },
+  "sprites": {
+    "idle": {
+      "left": "images/blu-guy/left.png",
+      "up": "images/blu-guy/up.png",
+      "right": "images/blu-guy/right.png",
+      "down": "images/blu-guy/down.png"
+    },
+    "walk": {
+      "left": "images/blu-guy/left-walk.png",
+      "up_left": "images/blu-guy/up-walk-left.png",
+      "up_right": "images/blu-guy/up-walk-right.png",
+      "right": "images/blu-guy/right-walk.png",
+      "down_left": "images/blu-guy/down-walk-left.png",
+      "down_right": "images/blu-guy/down-walk-right.png"
+    }
+  }
+}

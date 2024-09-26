@@ -3,7 +3,8 @@ from pygame.constants import QUIT
 from pygame.locals import Rect
 from pygame.surface import Surface
 from classes.player import Player
-
+from classes.enemy import Enemy
+from helpers.helpers import get_random_character_position
 
 def main():
     pygame.init()
@@ -33,22 +34,18 @@ def main():
 
 
     # PLAYER
-    PLAYER_WIDTH, PLAYER_HEIGHT = 150, 150
     PLAYER_X, PLAYER_Y = 0, 0
+    PLAYER_WIDTH, PLAYER_HEIGHT = 150, 150
     PLAYER_SPEED = 7
 
     with open("data/player.json", "r", encoding="utf-8") as file:
         player_data = json.load(file)
 
-        player_state = player_data["state"]
-        player_sprites = player_data["sprites"]
-
-
     player = Player(
         window=window,
         x=PLAYER_X, y=PLAYER_Y,
         width=PLAYER_WIDTH, height=PLAYER_HEIGHT, speed = PLAYER_SPEED,
-        state=player_state, sprites=player_sprites
+        state=player_data["state"], sprites=player_data["sprites"]
     )
 
     player.center(HORIZONTAL_CENTER, VERTICAL_CENTER)
@@ -58,16 +55,22 @@ def main():
 
 
     # ENEMY
-    enemy_positions = ["left", "right"]
-    current_enemy_position = None
+    current_enemy_position = "left"
 
+    ENEMY_X, ENEMY_Y = 0, 0
     ENEMY_WIDTH, ENEMY_HEIGHT = 75, 75
-    enemy = Rect(
-        0, 0, ENEMY_WIDTH, ENEMY_HEIGHT
+
+    enemy = Enemy(
+        window,
+        ENEMY_X, ENEMY_Y, ENEMY_WIDTH, ENEMY_HEIGHT, PLAYER_SPEED,
+        state={}, sprites={}
     )
-    RANDOM_X = random.randint(0 + ENEMY_WIDTH, WIDTH - ENEMY_WIDTH)
-    RANDOM_Y = random.randint(0+ ENEMY_HEIGHT, HEIGHT - ENEMY_HEIGHT)
-    enemy.center = (RANDOM_X, RANDOM_Y)
+
+    enemy = Rect(
+        ENEMY_X, ENEMY_Y, ENEMY_WIDTH, ENEMY_HEIGHT
+    )
+
+    enemy.center = get_random_character_position(ENEMY_WIDTH, ENEMY_HEIGHT)
 
     goth_image_left = pygame.transform.scale(
         pygame.image.load("images/girl-left.png"),
@@ -101,13 +104,21 @@ def main():
             exit()
 
 
+        """
+        1. Jeśli player stoi, to jest "idle", a jeśli idzie, to jest "walk".
+        2. Gdy player się zatrzymuje (żadna ze strzałek nie jest naciśnięta),
+        to wtedy sprite zmienia się od razu na "idle".
+        3. Jeśli strzałki są naciśnięte (poza góra i dół na raz i w boki), to
+        wtedy liczony jest czas zmiany animacji
+        """
+
         player.state["is_walking"] = 0
 
         # - a może np. if keys..., then player.direction = "left" (?)
         # - można też rozwinąć o kierunki, np. left-up, right-down
         # - może warto definiować player.is_walking w głównej pętli, poniżej
         # - nie zmiana z walk/idle/walk/idle, tylko raczej walk/1 walk/2 walk/1
-        # - zamiast player.is_walking, tp player.position "idle" lub "walk" ?
+        # - zamiast player.is_walking, to player.position "idle" lub "walk" ?
         if keys[pygame.K_LEFT]:
             player.move("left")
         if keys[pygame.K_RIGHT]:
@@ -122,14 +133,14 @@ def main():
         collide = pygame.Rect.colliderect(player.rect, enemy)
         if collide:
             score += 1
-            RANDOM_X = random.randint(0 + ENEMY_WIDTH, WIDTH - ENEMY_WIDTH)
-            RANDOM_Y = random.randint(0+ ENEMY_HEIGHT, HEIGHT - ENEMY_HEIGHT)
-            enemy.center = (RANDOM_X, RANDOM_Y)
+            enemy.center = get_random_character_position(ENEMY_WIDTH, ENEMY_HEIGHT)
 
 
         # PLAYER LOGIC
+        # wartości zmiennych lokalne: position, direction
+        # !! get_sprite(position, direction, vertical_leg_position)
         if player.state["position"] == "walk":
-            if player.state["direction"] == "up" or player.state["direction"] == "down":
+            if player.state["direction"] in ["up", "down"]:
                 if player.state["vertical_leg_position"] == "left":
                     player.state["direction"] = f"{player.state["direction"]}_left"
                     player.state["vertical_leg_position"] = "right"
@@ -139,7 +150,8 @@ def main():
 
         # here error, np. 'idle down_left'
         try:
-            player.render(player.sprites[player.state["position"]][player.state["direction"]])
+            player_image = player.sprites[player.state["position"]][player.state["direction"]]
+            player.render(player_image)
         except:
             print(player.state["position"], player.state["direction"])
 

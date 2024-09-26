@@ -1,14 +1,13 @@
 ## NEXT
 - przerzucić enemy na klasę
+- poprawienie kolizji player z enemy
 
 
 ## POPRAWKI
-- przy zmienianiu kierunku ruchu postać powinna od zmieniać animację, a nie czekać na zmianę okresu czasu is_walking
-- postać, a raczej jej rectange jest o wiele większa od obrazka, który się w niej zawiera (proporcje character image?)
+- przy zmienianiu kierunku ruchu postać powinna od razu zmieniać animację, a nie czekać na zmianę okresu czasu is_walking
 - dodanie animacji chodzenia po skosie?
 - dodanie tekstury tła
-- zamienić postać na klasę ?
-- jak się powol idzie w dół i zatrzymuje, to po pewnym czasie wyskakuje błąd
+- jak się powoli idzie w dół i zatrzymuje, to po pewnym czasie wyskakuje błąd
 - trzymanie na raz strzałek lewa/prawa i góra/dół sprawia, że postać i tak chodzi
 - odliczanie czasu, np. 30 sekund
 - celem jest zdobycie jak najlepszej liczby punktów
@@ -23,8 +22,11 @@
 
 ## DONE
 
+### 26/09/2024
+-
+
 ### 25/09/2024
 - oddzielić player_data (state i sprites) od kodu głównego
 
 ### do 24/09/2024
-- refaktoryzacja kodu i ogólne poprawienie elementów, zbudowanie gry
+- refaktoryzacja kodu i ogólne poprawienie elementów, zbudowanie gry, zmiana player na klasę
