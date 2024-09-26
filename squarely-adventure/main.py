@@ -4,6 +4,7 @@ from pygame.locals import Rect
 from pygame.surface import Surface
 from classes.player import Player
 from classes.enemy import Enemy
+from classes.spritesheet import SpriteSheet
 from helpers.helpers import get_random_character_position
 
 def main():
@@ -22,7 +23,7 @@ def main():
     HORIZONTAL_CENTER = WIDTH  // 2
     VERTICAL_CENTER = HEIGHT // 2
 
-    window = pygame.display.set_mode((WIDTH, HEIGHT)) #, pygame.FULLSCREEN)
+    window = pygame.display.set_mode((WIDTH, HEIGHT)) #  , pygame.FULLSCREEN)
 
 
     # CLOCK
@@ -38,20 +39,21 @@ def main():
     PLAYER_WIDTH, PLAYER_HEIGHT = 150, 150
     PLAYER_SPEED = 7
 
-    with open("data/player.json", "r", encoding="utf-8") as file:
-        player_data = json.load(file)
+    player_spritesheet_image = pygame.image.load("images/green-guy/sprites.png").convert_alpha()
+    player_spritesheet_colorkey =  (48, 104, 80)
+    player_spritesheet = SpriteSheet(player_spritesheet_image, player_spritesheet_colorkey)
 
     player = Player(
         window=window,
         x=PLAYER_X, y=PLAYER_Y,
-        width=PLAYER_WIDTH, height=PLAYER_HEIGHT, speed = PLAYER_SPEED,
-        state=player_data["state"], sprites=player_data["sprites"]
+        width=PLAYER_WIDTH, height=PLAYER_HEIGHT, speed = PLAYER_SPEED
     )
 
     player.center(HORIZONTAL_CENTER, VERTICAL_CENTER)
 
     last_player_walk_switch_time = pygame.time.get_ticks()
-    player_walk_switch_interval = 250
+    player_walk_switch_interval = 300
+    player_walk_position = 0
 
 
     # ENEMY
@@ -104,31 +106,6 @@ def main():
             exit()
 
 
-        """
-        1. Jeśli player stoi, to jest "idle", a jeśli idzie, to jest "walk".
-        2. Gdy player się zatrzymuje (żadna ze strzałek nie jest naciśnięta),
-        to wtedy sprite zmienia się od razu na "idle".
-        3. Jeśli strzałki są naciśnięte (poza góra i dół na raz i w boki), to
-        wtedy liczony jest czas zmiany animacji
-        """
-
-        player.state["is_walking"] = 0
-
-        # - a może np. if keys..., then player.direction = "left" (?)
-        # - można też rozwinąć o kierunki, np. left-up, right-down
-        # - może warto definiować player.is_walking w głównej pętli, poniżej
-        # - nie zmiana z walk/idle/walk/idle, tylko raczej walk/1 walk/2 walk/1
-        # - zamiast player.is_walking, to player.position "idle" lub "walk" ?
-        if keys[pygame.K_LEFT]:
-            player.move("left")
-        if keys[pygame.K_RIGHT]:
-           player.move("right")
-        if keys[pygame.K_UP]:
-            player.move("up")
-        if keys[pygame.K_DOWN]:
-            player.move("down")
-
-
         # COLLISION DETECTION
         collide = pygame.Rect.colliderect(player.rect, enemy)
         if collide:
@@ -137,35 +114,47 @@ def main():
 
 
         # PLAYER LOGIC
-        # wartości zmiennych lokalne: position, direction
-        # !! get_sprite(position, direction, vertical_leg_position)
-        if player.state["position"] == "walk":
-            if player.state["direction"] in ["up", "down"]:
-                if player.state["vertical_leg_position"] == "left":
-                    player.state["direction"] = f"{player.state["direction"]}_left"
-                    player.state["vertical_leg_position"] = "right"
-                elif player.state["vertical_leg_position"] == "right":
-                    player.state["direction"] = f"{player.state["direction"]}_right"
-                    player.state["vertical_leg_position"] = "left"
+        directions = ["down", "down-left", "left", "up-left", "up", "up-right",
+            "right", "down-right"]
 
-        # here error, np. 'idle down_left'
-        try:
-            player_image = player.sprites[player.state["position"]][player.state["direction"]]
-            player.render(player_image)
-        except:
-            print(player.state["position"], player.state["direction"])
+        if keys[pygame.K_LEFT] and keys[pygame.K_UP]:
+            player.move("up-left")
+        elif keys[pygame.K_RIGHT] and keys[pygame.K_UP]:
+            player.move("up-right")
+        elif keys[pygame.K_LEFT] and keys[pygame.K_DOWN]:
+            player.move("down-left")
+        elif keys[pygame.K_RIGHT] and keys[pygame.K_DOWN]:
+            player.move("down-right")
+        elif keys[pygame.K_LEFT]:
+            player.move("left")
+        elif keys[pygame.K_RIGHT]:
+           player.move("right")
+        elif keys[pygame.K_UP]:
+            player.move("up")
+        elif keys[pygame.K_DOWN]:
+            player.move("down")
+        else:
+            player.state["is_walking"] = 0
 
         current_player_switch_time = pygame.time.get_ticks()
 
         if player.state["is_walking"]:
             if current_player_switch_time >= \
-                last_player_walk_switch_time + player_walk_switch_interval:
-                    if player.state["position"] == "idle":
-                        player.state["position"] = "walk"
-                    elif player.state["position"] == "walk":
-                        player.state["position"] = "idle"
+            last_player_walk_switch_time + player_walk_switch_interval:
+                player_walk_position += 1
+                player_walk_position %= 4
 
-                    last_player_walk_switch_time = current_player_switch_time
+                last_player_walk_switch_time = current_player_switch_time
+        else:
+            player_walk_position = 0
+
+
+        player_direction_index = directions.index(player.state["direction"])
+        print(player_walk_position, player_direction_index)
+        player_image = player_spritesheet.get_image(
+            16, 16, player_walk_position, player_direction_index)
+
+        window.blit(player_image, player.rect)
 
 
         # ENEMY LOGIC

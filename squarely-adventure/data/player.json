@@ -7,18 +7,30 @@
   },
   "sprites": {
     "idle": {
-      "left": "images/blu-guy/left.png",
-      "up": "images/blu-guy/up.png",
-      "right": "images/blu-guy/right.png",
-      "down": "images/blu-guy/down.png"
+      "left": "images/blu-guy/idle/left.png",
+      "up": "images/blu-guy/idle/up.png",
+      "right": "images/blu-guy/idle/right.png",
+      "down": "images/blu-guy/idle/down.png"
     },
     "walk": {
-      "left": "images/blu-guy/left-walk.png",
-      "up_left": "images/blu-guy/up-walk-left.png",
-      "up_right": "images/blu-guy/up-walk-right.png",
-      "right": "images/blu-guy/right-walk.png",
-      "down_left": "images/blu-guy/down-walk-left.png",
-      "down_right": "images/blu-guy/down-walk-right.png"
+      "left": [
+        "images/blu-guy/walk/left-0.png",
+        "images/blu-guy/walk/left-1.png"
+      ],
+      "up": [
+        "images/blu-guy/walk/up-0.png",
+        "images/blu-guy/walk/up-1.png",
+        "images/blu-guy/walk/up-2.png"
+      ],
+      "right": [
+        "images/blu-guy/walk/right-0.png",
+        "images/blu-guy/walk/right-1.png"
+      ],
+      "down": [
+        "images/blu-guy/walk/down-0.png",
+        "images/blu-guy/walk/down-1.png",
+        "images/blu-guy/walk/down-2.png"
+      ]
     }
   }
 }
