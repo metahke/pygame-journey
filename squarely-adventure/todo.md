@@ -15,15 +15,12 @@
 
 
 ## player.py
-- dodać metodę typu "switch" pozwalającą na zmianę stanu ruchu, np. player.switch_movement() (?)
-- self.is_walking i self.position w zamyśle spełnia tę samą funkcję: idle/False oraz walk/True
-- może jak się idzie do góry i w dół to animacji nie widać
 
 
 ## DONE
 
 ### 26/09/2024
--
+- refaktoryzacja kodu, poprawienie zarządzania sprite'ami (uproszczenie logiki)
 
 ### 25/09/2024
 - oddzielić player_data (state i sprites) od kodu głównego

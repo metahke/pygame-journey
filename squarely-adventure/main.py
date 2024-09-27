@@ -12,18 +12,21 @@ def main():
     pygame.font.init()
 
     font = pygame.font.Font("fonts/game_over.ttf", 75)
-    pygame.display.set_caption("Squarely Journey Inc.")
-    pygame.mouse.set_cursor(pygame.cursors.diamond)
+    pygame.display.set_caption("Squarely Adventure")
+    pygame.mouse.set_visible(False)
 
 
     # MAIN WINDOW
-    WIDTH = 800
-    HEIGHT = 600
+    SCREEN_WIDTH = 800
+    SCREEN_HEIGHT = 600
 
-    HORIZONTAL_CENTER = WIDTH  // 2
-    VERTICAL_CENTER = HEIGHT // 2
+    HORIZONTAL_CENTER = SCREEN_WIDTH  // 2
+    VERTICAL_CENTER = SCREEN_HEIGHT // 2
 
-    window = pygame.display.set_mode((WIDTH, HEIGHT)) #  , pygame.FULLSCREEN)
+    BACKGROUND_COLOR = "olivedrab3"
+    FPS = 60
+
+    window = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT)) #  , pygame.FULLSCREEN)
 
 
     # CLOCK
@@ -38,6 +41,23 @@ def main():
     PLAYER_X, PLAYER_Y = 0, 0
     PLAYER_WIDTH, PLAYER_HEIGHT = 150, 150
     PLAYER_SPEED = 7
+    PLAYER_BACKWARD_SPEED = -1 * PLAYER_SPEED
+
+    directions = [
+        "bottom", "bottom-left", "left", "top-left",
+        "top", "top-right", "right", "bottom-right"
+    ]
+
+    directions_speeds = {
+        "bottom": (0, PLAYER_SPEED),
+        "bottom-left": (PLAYER_BACKWARD_SPEED, PLAYER_SPEED),
+        "left": (PLAYER_BACKWARD_SPEED, 0),
+        "top-left": (PLAYER_BACKWARD_SPEED, PLAYER_BACKWARD_SPEED),
+        "top": (0, PLAYER_BACKWARD_SPEED),
+        "top-right": (PLAYER_SPEED, PLAYER_BACKWARD_SPEED),
+        "right": (PLAYER_SPEED, 0),
+        "bottom-right": (PLAYER_SPEED, PLAYER_SPEED)
+    }
 
     player_spritesheet_image = pygame.image.load("images/green-guy/sprites.png").convert_alpha()
     player_spritesheet_colorkey =  (48, 104, 80)
@@ -46,7 +66,7 @@ def main():
     player = Player(
         window=window,
         x=PLAYER_X, y=PLAYER_Y,
-        width=PLAYER_WIDTH, height=PLAYER_HEIGHT, speed = PLAYER_SPEED
+        width=PLAYER_WIDTH, height=PLAYER_HEIGHT, speed=PLAYER_SPEED
     )
 
     player.center(HORIZONTAL_CENTER, VERTICAL_CENTER)
@@ -87,16 +107,18 @@ def main():
     # MAIN LOOP
     running = True
     while running:
-        window.fill("olivedrab3")
-        clock.tick(60)
+        window.fill(BACKGROUND_COLOR)
+        clock.tick(FPS)
 
         textsurface = font.render(f"Wynik: {score}", True, "black")
         window.blit(textsurface, (10, 10))
+
 
         # ZDARZENIA
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+
 
         # LOGIKA
         keys = pygame.key.get_pressed()
@@ -106,39 +128,32 @@ def main():
             exit()
 
 
-        # COLLISION DETECTION
-        collide = pygame.Rect.colliderect(player.rect, enemy)
-        if collide:
-            score += 1
-            enemy.center = get_random_character_position(ENEMY_WIDTH, ENEMY_HEIGHT)
-
-
         # PLAYER LOGIC
-        directions = ["down", "down-left", "left", "up-left", "up", "up-right",
-            "right", "down-right"]
+
+        ## MANAGE ARROW KEYS
+        new_direction = ""
 
         if keys[pygame.K_LEFT] and keys[pygame.K_UP]:
-            player.move("up-left")
+            new_direction = "top-left"
         elif keys[pygame.K_RIGHT] and keys[pygame.K_UP]:
-            player.move("up-right")
+            new_direction = "top-right"
         elif keys[pygame.K_LEFT] and keys[pygame.K_DOWN]:
-            player.move("down-left")
+            new_direction = "bottom-left"
         elif keys[pygame.K_RIGHT] and keys[pygame.K_DOWN]:
-            player.move("down-right")
+            new_direction = "bottom-right"
         elif keys[pygame.K_LEFT]:
-            player.move("left")
+            new_direction = "left"
         elif keys[pygame.K_RIGHT]:
-           player.move("right")
+           new_direction = "right"
         elif keys[pygame.K_UP]:
-            player.move("up")
+            new_direction = "top"
         elif keys[pygame.K_DOWN]:
-            player.move("down")
-        else:
-            player.state["is_walking"] = 0
+            new_direction = "bottom"
 
+        ## MANAGE ANIMATIONS MOVEMENT
         current_player_switch_time = pygame.time.get_ticks()
 
-        if player.state["is_walking"]:
+        if player.is_walking:
             if current_player_switch_time >= \
             last_player_walk_switch_time + player_walk_switch_interval:
                 player_walk_position += 1
@@ -148,13 +163,19 @@ def main():
         else:
             player_walk_position = 0
 
-
-        player_direction_index = directions.index(player.state["direction"])
-        print(player_walk_position, player_direction_index)
+        player_direction_index = directions.index(player.direction)
         player_image = player_spritesheet.get_image(
             16, 16, player_walk_position, player_direction_index)
 
-        window.blit(player_image, player.rect)
+        ## MOVE PLAYER
+        if new_direction != "":
+            player_x_speed, player_y_speed  = directions_speeds[new_direction]
+            player.move(new_direction, player_x_speed, player_y_speed)
+        else:
+            player.is_walking = False
+
+        ## DISPLAY PLAYER
+        player.render(player_image)
 
 
         # ENEMY LOGIC
@@ -177,6 +198,12 @@ def main():
         else:  # if None
             window.blit(goth_image_left, enemy)
 
+
+        # COLLISION DETECTION
+        collide = pygame.Rect.colliderect(player.rect, enemy)
+        if collide:
+            score += 1
+            enemy.center = get_random_character_position(ENEMY_WIDTH, ENEMY_HEIGHT)
 
         pygame.display.update()
 

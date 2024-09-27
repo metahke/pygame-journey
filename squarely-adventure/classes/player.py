@@ -7,79 +7,35 @@ class Player:
         self.window = window
         self.rect = Rect(x, y , width, height)
         self.speed = speed
+        self.direction = "bottom"
+        self.is_walking = False
 
-        self.state = {
-            "direction": "down",
-            "is_walking": 0
-        }
+    # player.update_x(), player.update_y()?
+    # @staticmethod
+    # def check_for_screen_passage(window, rectangle):
+    #     def wrapper(*args, **kwargs):
+    #         if rectangle.right < 0:
+    #             rectangle.left = window.get_width()
+    #         elif rectangle.left > window.get_width():
+    #             rectangle.right = 0
+
+    #         if rectangle.bottom < 0:
+    #             rectangle.top = window.get_height()
+    #         elif rectangle.top > window.get_height():
+    #             rectangle.bottom = 0
+
+    #     return wrapper
 
     def center(self, x, y):
         self.rect.center = (x, y)
 
-    # UPROŚCIĆ
-    def move(self, direction):
+    # @check_for_screen_passage
+    def move(self, direction, new_x, new_y):
+        self.direction = direction
+        self.is_walking = True
 
-        match direction:
-            case "down-left":
-                self.rect.x -= self.speed
-                self.rect.y += self.speed
+        self.rect.move_ip(new_x, new_y)
 
-                if self.rect.x < 0 - self.rect.width:
-                    self.rect.x = self.window.get_width()
-                if self.rect.y > self.window.get_height():
-                    self.rect.y = 0 - self.rect.width
-            case "left":
-                self.rect.x -= self.speed
 
-                if self.rect.x < 0 - self.rect.width:
-                    self.rect.x = self.window.get_width()
-            case "up-left":
-                self.rect.x -= self.speed
-                self.rect.y -= self.speed
-
-                if self.rect.x < 0 - self.rect.width:
-                    self.rect.x = self.window.get_width()
-                if self.rect.y < 0 - self.rect.height:
-                    self.rect.y = self.window.get_height()
-            case "up":
-                self.rect.y -= self.speed
-
-                if self.rect.y < 0 - self.rect.height:
-                    self.rect.y = self.window.get_height()
-            case "up-right":
-                self.rect.x += self.speed
-                self.rect.y -= self.speed
-
-                if self.rect.x > self.window.get_width():
-                    self.rect.x = 0 - self.rect.width
-                if self.rect.y < 0 - self.rect.height:
-                    self.rect.y = self.window.get_height()
-            case "right":
-                self.rect.x += self.speed
-
-                if self.rect.x > self.window.get_width():
-                    self.rect.x = 0 - self.rect.width
-            case "down-right":
-                self.rect.x += self.speed
-                self.rect.y += self.speed
-
-                if self.rect.x > self.window.get_width():
-                    self.rect.x = 0 - self.rect.width
-                if self.rect.y > self.window.get_height():
-                    self.rect.y = 0 - self.rect.width
-            case "down":
-                self.rect.y += self.speed
-
-                if self.rect.y > self.window.get_height():
-                    self.rect.y = 0 - self.rect.width
-
-        self.state["is_walking"] = 1
-        self.state["direction"] = direction
-
-    def render(self, image_path):
-        image = pygame.transform.scale(
-            pygame.image.load(image_path),
-            (self.rect.width, self.rect.height)
-        )
-
-        self.window.blit(image, self.rect)
+    def render(self, player_image):
+        self.window.blit(player_image, self.rect)
